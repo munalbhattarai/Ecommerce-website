@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { FaHeart, FaShoppingCart, FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, increaseQty, decreaseQty } from "../redux/cartSlice";
 
 const ProductCard = ({product}) => {
-  const [count, setCount] = useState(0);
+  const dispatch = useDispatch();
+  const cartItem = useSelector((state) => state.cart.items.find(item => item.id === product.id));
+  const count = cartItem ? cartItem.quantity : 0;
 
 
 
@@ -83,7 +87,7 @@ const ProductCard = ({product}) => {
           {
             count === 0 ? (
               <button
-                onClick={()=>setCount(1)}
+                onClick={(e) => { e.preventDefault(); dispatch(addToCart({...product, quantity: 1})); }}
                 className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition"
               >
                 <FaShoppingCart/>
@@ -94,7 +98,7 @@ const ProductCard = ({product}) => {
             (
               <div className="flex items-center bg-indigo-100 rounded-xl overflow-hidden">
                 <button
-                  onClick={()=>setCount(Math.max(count-1,0))}
+                  onClick={(e) => { e.preventDefault(); dispatch(decreaseQty(product.id)); }}
                   className="px-3 py-2 text-indigo-700 font-bold"
                 >
                   -
@@ -105,7 +109,7 @@ const ProductCard = ({product}) => {
                 </span>
 
                 <button
-                  onClick={()=>setCount(count+1)}
+                  onClick={(e) => { e.preventDefault(); dispatch(increaseQty(product.id)); }}
                   className="px-3 py-2 text-indigo-700 font-bold"
                 >
                   +
