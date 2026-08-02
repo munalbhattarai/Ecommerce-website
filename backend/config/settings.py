@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'apps.accounts',
     'rest_framework_simplejwt',
+    'apps.products',
+    'django_filters',
    
 ]
 
@@ -119,3 +121,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+from datetime import timedelta
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES" :( "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+
+    "PAGE_SIZE": 10
+}
+    
