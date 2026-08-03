@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'apps.products',
     'django_filters',
+    'apps.cart',
    
 ]
 
