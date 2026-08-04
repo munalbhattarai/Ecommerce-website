@@ -52,3 +52,10 @@ class UpdateCartItemView(generics.UpdateAPIView):
             cart__user= self.request.user
         )
         
+class DeleteCartItemView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return CartItem.objects.filter(
+            cart__user= self.request.user
+        )
