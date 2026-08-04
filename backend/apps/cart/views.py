@@ -6,7 +6,8 @@ from .serializers import AddToCartSerializer, CartSerializer
 from .models import Cart, CartItem
 from django.shortcuts import get_object_or_404
 from apps.products.models import Product
-
+from rest_framework import generics
+from .serializers import UpdateCartIemSerializer
 # Create your views here.
 
 class AddToCartView(APIView):
@@ -41,3 +42,13 @@ class CartView(APIView):
         cart,created = Cart.objects.get_or_create(user= request.user)
         serializer = CartSerializer(cart)
         return Response(serializer.data)
+    
+class UpdateCartItemView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateCartIemSerializer
+    
+    def get_queryset(self):
+        return CartItem.objects.filter(
+            cart__user= self.request.user
+        )
+        
