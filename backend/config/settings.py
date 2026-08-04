@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'apps.products',
     'django_filters',
     'apps.cart',
+    'apps.orders',
    
 ]
 
