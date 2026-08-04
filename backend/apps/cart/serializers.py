@@ -20,3 +20,9 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ["id", "items", "created_at"]
+        
+class UpdateCartIemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ["quantity"]
+    
