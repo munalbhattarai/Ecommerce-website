@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import AddToCartSerializer
+from .serializers import AddToCartSerializer, CartSerializer
 from .models import Cart, CartItem
 from django.shortcuts import get_object_or_404
 from apps.products.models import Product
@@ -33,3 +33,11 @@ class AddToCartView(APIView):
         return Response({
                 "message": "Product added to cart."},
                 status=status.HTTP_200_OK)
+        
+class CartView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        cart = request.user.cart
+        serializer = CartSerializer(cart)
+        return Response(serializer.data)
