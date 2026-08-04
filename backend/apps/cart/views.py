@@ -38,6 +38,6 @@ class CartView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        cart = request.user.cart
+        cart,created = Cart.objects.get_or_create(user= request.user)
         serializer = CartSerializer(cart)
         return Response(serializer.data)
