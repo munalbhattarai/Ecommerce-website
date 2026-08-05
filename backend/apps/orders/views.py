@@ -8,7 +8,7 @@ from rest_framework import generics
 from .serializers import OrderSerializer
 from .models import Order, OrderItem
 
-from .serializers import OrderListSerializer
+from .serializers import OrderListSerializer, OrderDetailSerializer
 
 class PlaceOrderView(APIView):
     permission_classes = [IsAuthenticated]
@@ -85,3 +85,12 @@ class OrderListView(generics.ListAPIView):
         return Order.objects.filter(
             user = self.request.user
         ).order_by("-created_at")
+        
+class OrderDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderDetailSerializer
+
+    def get_queryset(self):
+        return Order.objects.filter(
+            user=self.request.user
+        )
