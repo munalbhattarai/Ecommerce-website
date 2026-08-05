@@ -125,3 +125,12 @@ class CancelOrderView(APIView):
                     "message": "Order Cancelled Successfully"
                 }
             )
+            
+class SellerOrderListView(generics.ListAPIView):
+    serializer_class = OrderListSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return Order.objects.filter(
+            items__product__seller = self.request.user
+        ).distinct().order_by("-created_at")
