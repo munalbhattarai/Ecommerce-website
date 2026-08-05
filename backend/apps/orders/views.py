@@ -9,6 +9,8 @@ from .serializers import OrderSerializer
 from .models import Order, OrderItem
 
 from .serializers import OrderListSerializer, OrderDetailSerializer
+from rest_framework.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 
 class PlaceOrderView(APIView):
     permission_classes = [IsAuthenticated]
@@ -94,3 +96,32 @@ class OrderDetailView(generics.RetrieveAPIView):
         return Order.objects.filter(
             user=self.request.user
         )
+
+class CancelOrderView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request , pk):
+        order = get_object_or_404(
+            Order,
+            id=pk,
+            user = request.user
+        )
+        
+        if order.status != Order.PENDING:
+            raise ValidationError(
+                "only pending order can be cancelled"
+            )
+            
+        with transaction.atomic():
+            for item in order.items.all():
+                item.product.stock += item.quantity
+                item.product.save()
+                
+            order.status = Order.CANCELLED
+            order.save()
+            
+            return Response(
+                {
+                    "message": "Order Cancelled Successfully"
+                }
+            )
