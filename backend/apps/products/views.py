@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics, filters
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductSerializer
@@ -8,13 +9,17 @@ from .serializers import CategorySerializer, ProductSerializer
 
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+    serializer_class = CategorySerializer    
 
 
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
+    permission_classes = [IsAuthenticated]
+        
+    def perform_create(self, serializer):
+        serializer.save(seller=self.request.user)
+            
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -28,3 +33,12 @@ class ProductListCreateView(generics.ListCreateAPIView):
 class ProductRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    
+class SellerProductListView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Product.objects.filter(
+            seller=self.request.user
+        ).order_by("-id")
