@@ -8,7 +8,7 @@ from rest_framework import generics
 from .serializers import OrderSerializer
 from .models import Order, OrderItem
 
-from .serializers import OrderListSerializer, OrderDetailSerializer
+from .serializers import OrderListSerializer, OrderDetailSerializer, OrderStatusSerializer
 from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
@@ -39,7 +39,7 @@ class PlaceOrderView(APIView):
 
         # Check product stock
         for item in cart.items.all():
-            if item.quantity > item.product.stock:
+            if item.quantity > item.product.quantity:
                 return Response(
                     {
                         "detail": f"Not enough stock for {item.product.name}."
@@ -71,7 +71,7 @@ class PlaceOrderView(APIView):
                 )
 
                 # Reduce stock
-                item.product.stock -= item.quantity
+                item.product.quantity -= item.quantity
                 item.product.save()
 
             # Clear the cart
@@ -121,7 +121,7 @@ class CancelOrderView(APIView):
             
         with transaction.atomic():
             for item in order.items.all():
-                item.product.stock += item.quantity
+                item.product.quantity += item.quantity
                 item.product.save()
                 
             order.status = Order.CANCELLED
@@ -176,3 +176,31 @@ class SellerDashboardView(APIView):
             "pending_orders": pending_orders,
             "revenue": revenue,
         })
+        
+    
+class SellerOrderUpdateView(generics.UpdateAPIView):
+    serializer_class = OrderStatusSerializer
+    permission_classes = [IsAuthenticated, IsSeller]
+    
+    def get_queryset(self):
+        return Order.objects.filter(
+            items__product__seller = self.request.user
+        ).distinct()
+        
+    def perform_update(self, serializer):
+        order = self.get_object()
+        new_status = serializer.validated_data["status"]
+        
+        allowed = {
+            Order.PENDING: Order.PROCESSING,
+            Order.PROCESSING :Order.SHIPPED,
+            Order.SHIPPED : Order.DELIVERED,
+        }
+        current_status = order.status
+        
+        if allowed.get(current_status) != new_status:
+            raise ValidationError(
+                f"Cannot change order status from {current_status} to {new_status}."
+            )
+
+        serializer.save()

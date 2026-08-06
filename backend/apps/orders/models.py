@@ -4,12 +4,19 @@ from apps.products.models import Product
 
 # Create your models here.
 class Order(models.Model):
+    
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    SHIPPED = "SHIPPED"
+    DELIVERED = "DELIVERED"
+    CANCELLED = "CANCELLED"
+    
     STATUS_CHOICES = [
         ("PENDING","Pending"),
         ("PROCESSING", "Processing"),
         ("SHIPPED", "Shipped"),
         ("DELIVERED", "Delivered"),
-        ("CANELLED", "Cancelled"),
+        ("CANCELLED", "Cancelled"),
     ]
     user = models.ForeignKey(
         User,
