@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 
 # Application definition
 
@@ -44,11 +47,13 @@ INSTALLED_APPS = [
     'django_filters',
     'apps.cart',
     'apps.orders',
-    "drf_spectacular",
+    'drf_spectacular',
+    'corsheaders',
    
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -147,3 +152,8 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Backend API for React + Django E-Commerce Project",
     "VERSION": "1.0.0",
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+CORS_ALLOW_CREDENTIALS = True
