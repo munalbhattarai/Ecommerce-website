@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_filters',
     'apps.cart',
     'apps.orders',
+    "drf_spectacular",
    
 ]
 
@@ -129,8 +130,20 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES" :( "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.AllowAny",
+    ),
+
+    "DEFAULT_SCHEMA_CLASS":
+        "drf_spectacular.openapi.AutoSchema",
+    
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
 
     "PAGE_SIZE": 10
 }
     
+SPECTACULAR_SETTINGS = {
+    "TITLE": "E-Commerce API",
+    "DESCRIPTION": "Backend API for React + Django E-Commerce Project",
+    "VERSION": "1.0.0",
+}
