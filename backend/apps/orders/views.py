@@ -12,6 +12,13 @@ from .serializers import OrderListSerializer, OrderDetailSerializer
 from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
+from apps.accounts.permission import IsSeller
+from django.db.models import Sum, Count, DecimalField, F, ExpressionWrapper
+from decimal import Decimal
+from apps.products.models import Product
+from .models import Order, OrderItem
+
+
 class PlaceOrderView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -128,9 +135,44 @@ class CancelOrderView(APIView):
             
 class SellerOrderListView(generics.ListAPIView):
     serializer_class = OrderListSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
     
     def get_queryset(self):
         return Order.objects.filter(
             items__product__seller = self.request.user
         ).distinct().order_by("-created_at")
+        
+
+class SellerDashboardView(APIView):
+    permission_classes = [IsAuthenticated, IsSeller]
+    
+    def get(self, request):
+        seller_product = Product.objects.filter(
+            seller= request.user
+        )
+        total_products = seller_product.count()
+        seller_orders = Order.objects.filter(
+            items__product__seller= request.user
+        ).distinct()
+        total_orders = seller_orders.count()
+        pending_orders = seller_orders.filter(
+            status = Order.PENDING
+        ).count()
+        revenue = OrderItem.objects.filter(
+            product__seller=request.user,
+            order__status=Order.DELIVERED
+        ).aggregate(
+            total=Sum(
+                ExpressionWrapper(
+                    F("price")* F("quantity"),
+                    output_field=DecimalField()
+                )
+            )
+        )["total"] or Decimal("0.00")
+        
+        return Response({
+            "total_products" : total_products,
+            "total_orders": total_orders,
+            "pending_orders": pending_orders,
+            "revenue": revenue,
+        })

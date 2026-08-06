@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductSerializer
 
+from apps.accounts.permission import IsSeller
+
 
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -15,7 +17,7 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
         
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
@@ -36,7 +38,7 @@ class ProductRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     
 class SellerProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get_queryset(self):
         return Product.objects.filter(
