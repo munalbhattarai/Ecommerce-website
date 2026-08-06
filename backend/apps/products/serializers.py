@@ -7,6 +7,10 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class ProductSerializer(serializers.ModelSerializer):
+    seller = serializers.CharField(
+        source="seller.username",
+        read_only=True
+    )
     class Meta:
         model = Product
         fields = '__all__'

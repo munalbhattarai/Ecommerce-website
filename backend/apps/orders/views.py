@@ -89,11 +89,13 @@ class PlaceOrderView(APIView):
 class OrderListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = OrderListSerializer
-    
+
     def get_queryset(self):
-        return Order.objects.filter(
-            user = self.request.user
-        ).order_by("-created_at")
+        return (
+            Order.objects.filter(user=self.request.user)
+            .prefetch_related("items__product")
+            .order_by("-created_at")
+        )
         
 class OrderDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
@@ -101,8 +103,10 @@ class OrderDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         return Order.objects.filter(
-            user=self.request.user
-        )
+        user=self.request.user
+    ).prefetch_related(
+        "items__product"
+    )
 
 class CancelOrderView(APIView):
     permission_classes = [IsAuthenticated]

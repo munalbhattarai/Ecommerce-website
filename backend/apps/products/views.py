@@ -15,13 +15,13 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 
 
 class ProductListCreateView(generics.ListCreateAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related("seller")
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated, IsSeller]
-        
+
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
-            
+
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -33,14 +33,17 @@ class ProductListCreateView(generics.ListCreateAPIView):
 
 
 class ProductRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related("seller")
     serializer_class = ProductSerializer
-    
+
 class SellerProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated, IsSeller]
 
     def get_queryset(self):
-        return Product.objects.filter(
-            seller=self.request.user
-        ).order_by("-id")
+        return (
+            Product.objects
+            .select_related("seller")
+            .filter(seller=self.request.user)
+            .order_by("-id")
+        )
