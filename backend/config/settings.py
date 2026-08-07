@@ -146,6 +146,11 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "apps.common.pagination.CustomPagination",
     "PAGE_SIZE": 10,
 }
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+
     
 SPECTACULAR_SETTINGS = {
     "TITLE": "E-Commerce API",
