@@ -5,14 +5,13 @@ import ProtectedRoute from "../features/auth/components/ProtectedRoutes";
 import MainLayout from "../layouts/MainLayout";
 import Products from "../features/Products/pages/Products";
 import ProductDetails from "../features/Products/pages/ProductDetails";
+import Cart from "../features/Cart/pages/Cart";
 
 
 function Home() {
     return <h1>Home</h1>;
 }
-function Cart() {
-    return <h1>Cart</h1>;
-}
+
 
 function Orders() {
     return <h1>Orders</h1>;
