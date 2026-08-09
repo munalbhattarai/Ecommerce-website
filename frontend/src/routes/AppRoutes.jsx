@@ -4,6 +4,7 @@ import Register from "../features/auth/pages/Register";
 import ProtectedRoute from "../features/auth/components/ProtectedRoutes";
 import MainLayout from "../layouts/MainLayout";
 import Products from "../features/Products/pages/Products";
+import ProductDetails from "../features/Products/pages/ProductDetails";
 
 
 function Home() {
@@ -27,6 +28,7 @@ export default function AppRoutes() {
                     {/* Public */}
                     <Route path="/" element={<Home />} />
                     <Route path="/products" element={<Products />} />
+                    <Route path="/products/:id/" element={<ProductDetails/>}/>
 
                      {/* Authentication */}
                 <Route path="/login" element={<Login/>} />

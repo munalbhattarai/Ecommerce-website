@@ -1,32 +1,34 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const productApi = createApi({
-    reducerPath: "productApi",
+	reducerPath: 'productApi',
 
-    baseQuery: fetchBaseQuery({
-        baseUrl: import.meta.env.VITE_API_URL,
+	baseQuery: fetchBaseQuery({
+		baseUrl: import.meta.env.VITE_API_URL,
 
-        prepareHeaders: (headers) => {
-            const token = localStorage.getItem("accessToken");
+		prepareHeaders: headers => {
+			const token = localStorage.getItem('accessToken');
 
-            if (token) {
-                headers.set(
-                    "Authorization",
-                    `Bearer ${token}`
-                );
-            }
+			if (token) {
+				headers.set('Authorization', `Bearer ${token}`);
+			}
 
-            return headers;
-        },
-    }),
+			return headers;
+		}
+	}),
 
-    endpoints: (builder) => ({
-        getProducts: builder.query({
-            query: () => "products/",
-        }),
-    }),
+	endpoints: builder => ({
+		getProducts: builder.query({
+			query: () => 'products/'
+		}),
+
+		getProduct: builder.query({
+			query: id => `products/${id}/`
+		}),
+	})
 });
 
 export const {
     useGetProductsQuery,
+    useGetProductQuery,
 } = productApi;

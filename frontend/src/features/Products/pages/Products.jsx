@@ -1,4 +1,7 @@
-import { useGetProductsQuery } from "../api/productApi";
+import {useGetProductsQuery,} from "../api/productApi";
+import ProductCard from "../components/ProductCard";
+
+
 
 export default function Products() {
 
@@ -9,29 +12,42 @@ export default function Products() {
     } = useGetProductsQuery();
 
     if (isLoading) {
-        return <p>Loading products...</p>;
+        return (
+            <div className="p-6">
+                <p>Loading products...</p>
+            </div>
+        );
     }
 
     if (isError) {
-        return <p>Failed to load products.</p>;
+        return (
+            <div className="p-6">
+                <p>
+                    Failed to load products.
+                </p>
+            </div>
+        );
     }
 
+    const products = data?.results ?? [];
+
     return (
-        <div>
+        <div className="mx-auto max-w-7xl p-6">
 
-            <h1>Products</h1>
+            <h1 className="mb-6 text-3xl font-bold">
+                Products
+            </h1>
 
-            {data?.results?.map((product) => (
-                <div key={product.id}>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 
-                    <h2>{product.name}</h2>
+                {products.map((product) => (
+                    <ProductCard
+                        key={product.id}
+                        product={product}
+                    />
+                ))}
 
-                    <p>
-                        Rs. {product.price}
-                    </p>
-
-                </div>
-            ))}
+            </div>
 
         </div>
     );
