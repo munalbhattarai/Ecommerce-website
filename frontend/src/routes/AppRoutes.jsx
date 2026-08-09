@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../features/auth/pages/Login";
+import Register from "../features/auth/pages/Register";
 
 
 function Home() {
@@ -15,6 +16,7 @@ export default function AppRoutes() {
                     element={<Home />}
                 />
                 <Route path="/login" element={<Login/>}/>
+                <Route path="/register" element={<Register/>}/>
             </Routes>
         </BrowserRouter>
     );
