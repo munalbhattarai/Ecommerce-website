@@ -6,6 +6,7 @@ import MainLayout from "../layouts/MainLayout";
 import Products from "../features/Products/pages/Products";
 import ProductDetails from "../features/Products/pages/ProductDetails";
 import Cart from "../features/Cart/pages/Cart";
+import Checkout from "../features/orders/pages/Checkout";
 
 
 function Home() {
@@ -37,6 +38,7 @@ export default function AppRoutes() {
                             {/* Protected */}
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/orders" element={<Orders />} />
+                    <Route path="/checkout" element={<Checkout />} />
 
                 </Route>
                 </Route>
