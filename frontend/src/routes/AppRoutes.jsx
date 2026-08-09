@@ -3,6 +3,7 @@ import Login from "../features/auth/pages/Login";
 import Register from "../features/auth/pages/Register";
 import ProtectedRoute from "../features/auth/components/ProtectedRoutes";
 import MainLayout from "../layouts/MainLayout";
+import Products from "../features/Products/pages/Products";
 
 
 function Home() {
@@ -15,9 +16,7 @@ function Cart() {
 function Orders() {
     return <h1>Orders</h1>;
 }
-function Products() {
-    return <h1>Orders</h1>;
-}
+
 
 export default function AppRoutes() {
     return (
