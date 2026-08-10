@@ -2,6 +2,8 @@ import { useParams } from 'react-router-dom';
 
 import { useGetProductQuery } from '../api/productApi';
 import { useAddToCartMutation } from '../../cart/api/cartApi';
+import Loading from '../../../components/ui/Loading';
+import ErrorMessage from '../../../components/ui/ErrorMessage';
 
 export default function ProductDetails() {
 	const [addToCart, { isLoading: isAdding }] = useAddToCartMutation();
@@ -11,11 +13,11 @@ export default function ProductDetails() {
 	const { data: product, isLoading, isError } = useGetProductQuery(id);
 
 	if (isLoading) {
-		return <p>Loading product...</p>;
+		return <Loading message="Loading product..." />;
 	}
 
-	if (isError) {
-		return <p>Product not found.</p>;
+	if (isError || !product) {
+		return <ErrorMessage message="Product not found." />;
 	}
 
 	return (

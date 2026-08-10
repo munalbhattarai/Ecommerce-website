@@ -1,18 +1,20 @@
 import { Link } from 'react-router-dom';
 import { useGetCartQuery } from '../api/cartApi';
 import CartItem from '../components/CartItem';
+import Loading from '../../../components/ui/Loading';
+import ErrorMessage from '../../../components/ui/ErrorMessage';
+import EmptyState from '../../../components/ui/EmptyState';
 
 export default function Cart() {
 	const { data, isLoading, isError } = useGetCartQuery();
 
 	if (isLoading) {
-		return <div className="p-6">Loading cart...</div>;
+		return <Loading message="Loading your cart..." />;
 	}
 
 	if (isError) {
-		return <div className="p-6">Failed to load cart.</div>;
+		return <ErrorMessage message="Unable to load your cart." />;
 	}
-
 	const cartItems = data?.items ?? [];
 
 	const total = cartItems.reduce(
@@ -25,8 +27,8 @@ export default function Cart() {
 			<h1 className="mb-6 text-3xl font-bold">Your Cart</h1>
 
 			{cartItems.length === 0 ? (
-				<p>Your cart is empty.</p>
-			) : (
+				<EmptyState message="Your cart is empty." />
+			): (
 				<>
 					<div>
 						{cartItems.map(item => (

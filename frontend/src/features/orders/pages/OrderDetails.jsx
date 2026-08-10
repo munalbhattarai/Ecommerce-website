@@ -2,6 +2,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useGetOrderQuery, useCancelOrderMutation } from '../api/orderApi';
 
+import Loading from '../../../components/ui/Loading';
+import ErrorMessage from '../../../components/ui/ErrorMessage';
+
 export default function OrderDetails() {
 	const { id } = useParams();
 	const navigate = useNavigate();
@@ -11,11 +14,11 @@ export default function OrderDetails() {
 	const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
 
 	if (isLoading) {
-		return <div className="p-6">Loading order...</div>;
+		return <Loading message="Loading order..." />;
 	}
 
-	if (isError) {
-		return <div className="p-6">Order not found.</div>;
+	if (isError || !order) {
+		return <ErrorMessage message="Order not found." />;
 	}
 
 	const handleCancel = async () => {

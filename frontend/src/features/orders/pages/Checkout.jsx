@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useGetCartQuery } from '../../cart/api/cartApi';
 import { usePlaceOrderMutation } from '../api/orderApi';
 import { useState } from 'react';
+import Loading from '../../../components/ui/Loading';
+import ErrorMessage from '../../../components/ui/ErrorMessage';
 
 export default function Checkout() {
 	const [shippingAddress, setShippingAddress] = useState('');
@@ -15,11 +17,11 @@ export default function Checkout() {
 		usePlaceOrderMutation();
 
 	if (isLoading) {
-		return <div className="p-6">Loading checkout...</div>;
+		return <Loading message="Loading checkout..." />;
 	}
 
 	if (isError) {
-		return <div className="p-6">Failed to load cart.</div>;
+		return <ErrorMessage message="Unable to load your cart." />;
 	}
 
 	const cartItems = data?.items ?? [];

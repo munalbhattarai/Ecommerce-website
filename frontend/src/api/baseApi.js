@@ -1,96 +1,86 @@
-import {
-    fetchBaseQuery,
-} from "@reduxjs/toolkit/query/react";
+import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
 
 const rawBaseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
+	baseUrl: import.meta.env.VITE_API_URL,
 
-    prepareHeaders: (headers) => {
+	prepareHeaders: headers => {
+		const token = localStorage.getItem('accessToken');
 
-        const token =
-            localStorage.getItem("accessToken");
+		if (token) {
+			headers.set('Authorization', `Bearer ${token}`);
+		}
 
-        if (token) {
-            headers.set(
-                "Authorization",
-                `Bearer ${token}`
-            );
-        }
-
-        return headers;
-    },
+		return headers;
+	}
 });
 
-const baseQueryWithReauth = async (
-    args,
-    api,
-    extraOptions
-) => {
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+	let result = await rawBaseQuery(args, api, extraOptions);
 
-    let result = await rawBaseQuery(
-        args,
-        api,
-        extraOptions
-    );
+	// Access token expired
+	if (result.error?.status === 401) {
+		const refreshToken = localStorage.getItem('refreshToken');
 
-    // Access token expired
-    if (result.error?.status === 401) {
+		if (refreshToken) {
+			const refreshResult = await rawBaseQuery(
+				{
+					url: 'accounts/refresh/',
+					method: 'POST',
+					body: {
+						refresh: refreshToken
+					}
+				},
+				api,
+				extraOptions
+			);
 
-        console.log(
-            "Access token expired. Refreshing..."
-        );
+			if (refreshResult.data) {
+				const newAccessToken = refreshResult.data.access;
 
-        const refreshToken =
-            localStorage.getItem("refreshToken");
+				localStorage.setItem('accessToken', newAccessToken);
 
-        if (!refreshToken) {
-            return result;
-        }
+				// Retry original request
+				result = await rawBaseQuery(args, api, extraOptions);
+			} else {
+				localStorage.removeItem('accessToken');
 
-        // Request new access token
-        const refreshResult =
-            await rawBaseQuery(
-                {
-                    url: "accounts/refresh/",
-                    method: "POST",
-                    body: {
-                        refresh: refreshToken,
-                    },
-                },
-                api,
-                extraOptions
-            );
+				localStorage.removeItem('refreshToken');
+			}
+		}
+	}
 
-        if (refreshResult.data) {
+	// Centralized error logging
+	if (result.error) {
+		const status = result.error.status;
 
-            const newAccessToken =
-                refreshResult.data.access;
+		switch (status) {
+			case 400:
+				console.error('Bad request:', result.error.data);
+				break;
 
-            localStorage.setItem(
-                "accessToken",
-                newAccessToken
-            );
+			case 403:
+				console.error('Permission denied.');
+				break;
 
-            // Retry original request
-            result = await rawBaseQuery(
-                args,
-                api,
-                extraOptions
-            );
-        } else {
+			case 404:
+				console.error('Resource not found.');
+				break;
 
-            // Refresh token also expired
-            localStorage.removeItem(
-                "accessToken"
-            );
+			case 500:
+				console.error('Server error.');
+				break;
 
-            localStorage.removeItem(
-                "refreshToken"
-            );
-        }
-    }
+			case 'FETCH_ERROR':
+				console.error('Unable to connect to the server.');
+				break;
 
-    return result;
+			default:
+				console.error('API error:', result.error);
+		}
+	}
+
+	return result;
 };
 
 export default baseQueryWithReauth;
