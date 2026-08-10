@@ -1,9 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import baseQueryWithReauth from "../../../api/baseApi";
+
+
 
 export const orderApi = createApi({
 	reducerPath: 'orderApi',
 
-	baseQuery: fetchBaseQuery({
+	baseQuery: baseQueryWithReauth({
 		baseUrl: import.meta.env.VITE_API_URL,
 
 		prepareHeaders: headers => {
