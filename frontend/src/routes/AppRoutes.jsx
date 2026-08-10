@@ -7,7 +7,9 @@ import Products from '../features/Products/pages/Products';
 import ProductDetails from '../features/Products/pages/ProductDetails';
 import Cart from '../features/Cart/pages/Cart';
 import Checkout from '../features/orders/pages/Checkout';
-import Orders from "../features/orders/pages/Orders";
+
+import Orders from '../features/orders/pages/Orders';
+import OrderDetails from '../features/orders/pages/OrderDetails';
 
 function Home() {
 	return <h1>Home</h1>;
@@ -34,6 +36,7 @@ export default function AppRoutes() {
 						<Route path="/cart" element={<Cart />} />
 						<Route path="/orders" element={<Orders />} />
 						<Route path="/checkout" element={<Checkout />} />
+                        <Route path="/orders/:id" element={<OrderDetails/>} />
 					</Route>
 				</Route>
 			</Routes>
