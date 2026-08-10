@@ -6,21 +6,7 @@ import baseQueryWithReauth from "../../../api/baseApi";
 export const orderApi = createApi({
 	reducerPath: 'orderApi',
 
-	baseQuery: baseQueryWithReauth({
-		baseUrl: import.meta.env.VITE_API_URL,
-
-		prepareHeaders: headers => {
-			const token = localStorage.getItem('accessToken');
-
-			if (token) {
-				headers.set('Authorization', `Bearer ${token}`);
-			}
-
-			return headers;
-		}
-	}),
-
-	tagTypes: ['Orders'],
+	baseQuery: baseQueryWithReauth,
 
 	endpoints: builder => ({
 		// GET /api/order/

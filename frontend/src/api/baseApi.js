@@ -51,7 +51,7 @@ const baseQueryWithReauth = async (
         const refreshResult =
             await rawBaseQuery(
                 {
-                    url: "token/refresh/",
+                    url: "accounts/refresh/",
                     method: "POST",
                     body: {
                         refresh: refreshToken,
