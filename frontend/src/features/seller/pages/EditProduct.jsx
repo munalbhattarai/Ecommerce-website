@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useCreateProductMutation, useGetCategoriesQuery } from '../api/sellerApi';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useGetProductQuery } from '../../Products/api/ProductApi';
+import { useGetCategoriesQuery, useUpdateProductMutation } from '../api/sellerApi';
 import Loading from '../../../components/ui/Loading';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
 import {
@@ -10,33 +11,47 @@ import {
 	FiPackage,
 	FiDollarSign,
 	FiList,
-	FiArrowRight
+	FiSave
 } from 'react-icons/fi';
 
 const inputCls = 'w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all';
 const labelCls = 'mb-1.5 block text-sm font-bold text-slate-700';
 
-export default function CreateProduct() {
+export default function EditProduct() {
+	const { id } = useParams();
 	const navigate = useNavigate();
-	const [formError, setFormError] = useState('');
-	const [imagePreview, setImagePreview] = useState(null);
 
-	const [createProduct, { isLoading }] = useCreateProductMutation();
-	const { data: categories, isLoading: categoriesLoading } = useGetCategoriesQuery();
+	const { data: product, isLoading, isError } = useGetProductQuery(id);
+	const { data: categories } = useGetCategoriesQuery();
+	const [updateProduct, { isLoading: isSaving }] = useUpdateProductMutation();
 
 	const [form, setForm] = useState({
-		name: '',
-		price: '',
-		model: '',
-		description: '',
-		category: '',
-		brand: '',
-		slug: '',
-		quantity: 0,
-		is_available: true
+		name: '', price: '', model: '', description: '',
+		category: '', brand: '', slug: '', quantity: 0, is_available: true
 	});
 
 	const [imageFile, setImageFile] = useState(null);
+	const [imagePreview, setImagePreview] = useState(null);
+	const [formError, setFormError] = useState('');
+
+	useEffect(() => {
+		if (product) {
+			setForm({
+				name: product.name ?? '',
+				price: product.price ?? '',
+				model: product.model ?? '',
+				description: product.description ?? '',
+				category: product.category ?? '',
+				brand: product.brand ?? '',
+				slug: product.slug ?? '',
+				quantity: product.quantity ?? 0,
+				is_available: product.is_available ?? true
+			});
+			if (product.images || product.image) {
+				setImagePreview(product.images || product.image);
+			}
+		}
+	}, [product]);
 
 	const handleChange = e => {
 		const { name, value, type, checked } = e.target;
@@ -59,26 +74,26 @@ export default function CreateProduct() {
 		formData.append('name', form.name);
 		formData.append('price', form.price);
 		formData.append('model', form.model);
+		formData.append('description', form.description);
 		formData.append('category', form.category);
 		formData.append('brand', form.brand);
-		formData.append('description', form.description);
 		formData.append('slug', form.slug);
 		formData.append('quantity', form.quantity);
 		formData.append('is_available', form.is_available ? 'true' : 'false');
 		if (imageFile) formData.append('images', imageFile);
 
 		try {
-			await createProduct(formData).unwrap();
+			await updateProduct({ id, data: formData }).unwrap();
 			navigate('/seller/products', {
-				state: { flash: { type: 'success', message: 'Product created successfully.' } }
+				state: { flash: { type: 'success', message: 'Product updated successfully.' } }
 			});
 		} catch (error) {
-			setFormError(error?.data?.detail || 'Failed to create product. Please review the form and try again.');
+			setFormError(error?.data?.detail || 'Failed to update product. Please try again.');
 		}
 	};
 
-	if (categoriesLoading) return <Loading message="Loading categories..." />;
-	if (!categories && !categoriesLoading) return <ErrorMessage message="Unable to load categories." />;
+	if (isLoading) return <Loading message="Loading product..." />;
+	if (isError || !product) return <ErrorMessage message="Unable to load product." />;
 
 	return (
 		<div className="animate-in fade-in duration-500 space-y-8">
@@ -86,7 +101,8 @@ export default function CreateProduct() {
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
 					<p className="text-sm font-bold uppercase tracking-widest text-indigo-600">Seller</p>
-					<h1 className="mt-1 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">New Product</h1>
+					<h1 className="mt-1 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">Edit Product</h1>
+					<p className="mt-1 text-sm text-slate-500 font-medium line-clamp-1">{product.name}</p>
 				</div>
 				<Link
 					to="/seller/products"
@@ -115,19 +131,19 @@ export default function CreateProduct() {
 						<div className="grid gap-5 sm:grid-cols-2">
 							<div>
 								<label className={labelCls}>Product Name <span className="text-rose-500">*</span></label>
-								<input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="e.g. iPhone 15 Pro" className={inputCls} />
+								<input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="Product name" className={inputCls} />
 							</div>
 							<div>
 								<label className={labelCls}>Brand <span className="text-rose-500">*</span></label>
-								<input type="text" name="brand" value={form.brand} onChange={handleChange} required placeholder="e.g. Apple" className={inputCls} />
+								<input type="text" name="brand" value={form.brand} onChange={handleChange} required placeholder="Brand" className={inputCls} />
 							</div>
 							<div>
 								<label className={labelCls}>Model</label>
-								<input type="text" name="model" value={form.model} onChange={handleChange} placeholder="e.g. A17 Pro" className={inputCls} />
+								<input type="text" name="model" value={form.model} onChange={handleChange} placeholder="Model" className={inputCls} />
 							</div>
 							<div>
 								<label className={labelCls}>Slug <span className="text-rose-500">*</span></label>
-								<input type="text" name="slug" value={form.slug} onChange={handleChange} required placeholder="e.g. iphone-15-pro" className={inputCls} />
+								<input type="text" name="slug" value={form.slug} onChange={handleChange} required placeholder="url-slug" className={inputCls} />
 							</div>
 						</div>
 					</div>
@@ -144,7 +160,7 @@ export default function CreateProduct() {
 							onChange={handleChange}
 							required
 							rows={5}
-							placeholder="Describe your product in detail — features, specs, condition, etc."
+							placeholder="Describe your product..."
 							className={inputCls + ' resize-none'}
 						/>
 					</div>
@@ -156,15 +172,15 @@ export default function CreateProduct() {
 							Product Image
 						</h2>
 						{imagePreview ? (
-							<div className="relative overflow-hidden rounded-xl aspect-video">
-								<img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
-								<button
-									type="button"
-									onClick={() => { setImagePreview(null); setImageFile(null); }}
-									className="absolute top-3 right-3 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-rose-600 shadow-sm hover:bg-white"
-								>
-									Remove
-								</button>
+							<div className="space-y-3">
+								<div className="relative overflow-hidden rounded-xl aspect-video">
+									<img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+								</div>
+								<label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-600 transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600">
+									<FiUploadCloud />
+									Replace Image
+									<input type="file" accept="image/*" className="sr-only" onChange={handleImageChange} />
+								</label>
 							</div>
 						) : (
 							<label className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-10 text-center transition-all hover:border-indigo-300 hover:bg-indigo-50/30">
@@ -189,7 +205,7 @@ export default function CreateProduct() {
 						</h2>
 						<div>
 							<label className={labelCls}>Price (Rs.) <span className="text-rose-500">*</span></label>
-							<input type="number" name="price" value={form.price} onChange={handleChange} required min="0" placeholder="0.00" className={inputCls} />
+							<input type="number" name="price" value={form.price} onChange={handleChange} required min="0" className={inputCls} />
 						</div>
 					</div>
 
@@ -223,7 +239,7 @@ export default function CreateProduct() {
 						<h2 className="text-lg font-black text-slate-900">Category</h2>
 						<div>
 							<label className={labelCls}>Select Category <span className="text-rose-500">*</span></label>
-							<select name="category" value={form.category} onChange={handleChange} required disabled={categoriesLoading} className={inputCls}>
+							<select name="category" value={form.category} onChange={handleChange} required className={inputCls}>
 								<option value="">Choose a category...</option>
 								{(categories?.results ?? categories ?? []).map(category => (
 									<option key={category.id} value={category.id}>{category.name}</option>
@@ -235,18 +251,18 @@ export default function CreateProduct() {
 					{/* Submit */}
 					<button
 						type="submit"
-						disabled={isLoading}
+						disabled={isSaving}
 						className="group flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-700 hover:shadow-xl active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
 					>
-						{isLoading ? (
+						{isSaving ? (
 							<span className="flex items-center gap-2">
 								<div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-								Creating...
+								Saving...
 							</span>
 						) : (
 							<>
-								Create Product
-								<FiArrowRight className="transition-transform group-hover:translate-x-1" />
+								<FiSave />
+								Save Changes
 							</>
 						)}
 					</button>

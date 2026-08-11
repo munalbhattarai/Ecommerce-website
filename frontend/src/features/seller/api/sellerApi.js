@@ -1,5 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import baseQueryWithReauth from "../../../app/api/baseApi";
+import baseQueryWithReauth from "../../../api/baseApi";
 
 export const sellerApi = createApi({
     reducerPath: "sellerApi",
@@ -14,22 +14,16 @@ export const sellerApi = createApi({
 
     endpoints: (builder) => ({
 
-        // GET /api/seller/
-        getSellerProfile: builder.query({
-            query: () => "seller/",
-            providesTags: ["Seller"],
+        // GET /api/products/seller/
+        getSellerProducts: builder.query({
+            query: () => "products/seller/",
+            providesTags: ["SellerProducts"],
         }),
 
         // GET /api/order/seller/dashboard/
         getSellerDashboard: builder.query({
             query: () => "order/seller/dashboard/",
-            providesTags: ["SellerOrders"],
-        }),
-
-        // GET /api/products/
-        getSellerProducts: builder.query({
-            query: () => "products/",
-            providesTags: ["SellerProducts"],
+            providesTags: ["Seller"],
         }),
 
         // POST /api/products/
@@ -40,7 +34,28 @@ export const sellerApi = createApi({
                 body: formData,
             }),
 
-            invalidatesTags: ["SellerProducts"],
+            invalidatesTags: ["SellerProducts", "Seller"],
+        }),
+
+        // PATCH /api/products/{id}/
+        updateProduct: builder.mutation({
+            query: ({ id, data }) => ({
+                url: `products/${id}/`,
+                method: "PATCH",
+                body: data,
+            }),
+
+            invalidatesTags: ["SellerProducts", "Seller"],
+        }),
+
+        // DELETE /api/products/{id}/
+        deleteProduct: builder.mutation({
+            query: (id) => ({
+                url: `products/${id}/`,
+                method: "DELETE",
+            }),
+
+            invalidatesTags: ["SellerProducts", "Seller"],
         }),
 
         // GET /api/categories/
@@ -97,10 +112,11 @@ export const sellerApi = createApi({
 });
 
 export const {
-    useGetSellerProfileQuery,
-    useGetSellerDashboardQuery,
     useGetSellerProductsQuery,
+    useGetSellerDashboardQuery,
     useCreateProductMutation,
+    useUpdateProductMutation,
+    useDeleteProductMutation,
     useGetCategoriesQuery,
     useCreateCategoryMutation,
     useGetSellerOrdersQuery,
