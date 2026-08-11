@@ -10,9 +10,20 @@ export const loginRequest = async (credentials) => {
 };
 
 export const registerRequest = async (userData) => {
+    const { password2: _password2, ...registrationData } = userData;
+
     const { data } = await api.post(
         "accounts/register/",
-        userData
+        registrationData
+    );
+
+    return data;
+};
+
+// Get currently logged-in user's profile
+export const getProfileRequest = async () => {
+    const { data } = await api.get(
+        "accounts/profile/"
     );
 
     return data;

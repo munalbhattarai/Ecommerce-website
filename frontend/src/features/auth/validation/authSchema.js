@@ -10,9 +10,7 @@ export const loginSchema = z.object({
         .min(1, "Password is required"),
 });
 
-
 export const registerSchema = z.object({
-
     username: z
         .string()
         .min(3, "Username must be at least 3 characters"),
@@ -29,6 +27,9 @@ export const registerSchema = z.object({
         .string()
         .min(8, "Please confirm your password"),
 
+    role: z
+        .enum(["BUYER", "SELLER"])
+        .default("BUYER"),
 }).refine(
     (data) => data.password === data.password2,
     {

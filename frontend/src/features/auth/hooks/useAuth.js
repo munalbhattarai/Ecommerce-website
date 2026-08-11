@@ -3,35 +3,54 @@ import { useNavigate } from "react-router-dom";
 
 import {
     loginSuccess,
+    setUser,
     logout,
 } from "../authSlice";
 
 import {
     loginRequest,
-} from "../api/authAPI";
+    getProfileRequest,
+} from "../api/authApi";
 
 export default function useAuth() {
-
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const auth = useSelector(state => state.auth);
+    const auth = useSelector((state) => state.auth);
 
     const login = async (credentials) => {
+        try {
+            const data = await loginRequest(credentials);
 
-        const data = await loginRequest(credentials);
+            dispatch(loginSuccess(data));
 
-        dispatch(loginSuccess(data));
+            const profile = await getProfileRequest();
 
-        navigate("/");
+            dispatch(setUser(profile));
+
+            const destination = profile?.role === "SELLER"
+                ? "/seller"
+                : "/";
+
+            navigate(destination, {
+                state: {
+                    flash: {
+                        type: "success",
+                        message: "Signed in successfully."
+                    }
+                }
+            });
+
+            return profile;
+        } catch (error) {
+            console.error("AUTH ERROR:", error);
+            throw error;
+        }
     };
 
     const signOut = () => {
-
         dispatch(logout());
-
         navigate("/login");
-
     };
 
     return {
